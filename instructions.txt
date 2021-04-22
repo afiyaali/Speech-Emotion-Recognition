@@ -1,0 +1,87 @@
+This Speech Emotion Recognition Machine Learning Project Folder consists of the following components -->
+
+---> Folder - Template [consists the client side HTML Pages for Index and Prediction]
+
+---> File - mlp_classifier-main.py [this is the main model]
+
+---> File - features.py [this is a feature file of the model which has been made up into a different file which consists of the emotions, 
+                    the processing part of the emotion from the model, and converting the incompaitable file to the compaitable one 
+                    to analyse the emotion]
+
+---> File - ser-web.py [this is the flask webapp which will take an audio file through the web interface, process it through the model to 
+                   obtain the emotion of the audio and then show up the emotion from the list of available emotions prescribed in 
+                   the model to the user on the final prediction page.]
+
+---> File - start-flask-ser-webapp.sh [this contains a script to start the flask ser-webapp, this can easily be run from the terminal with the
+                                  help of command that is provided at the bottom of this instructions sheet] :)
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+1. ** REPLACE MY PATH TO THAT OF YOURS, REFERENCING FROM YOUR ORIGINAL JUPYTER NOTEBOOK ***************
+#Load the data and extract features for each sound file from the RAVDESS dataset
+x,y=load_data("/home/maazi/Desktop/SpeechRecog/speech_data/Actor_*/*.wav",
+emotions_to_observe)
+***********************
+
+2. It will be better to import the dataset in this same folder.
+
+3. Import and Install all the required dependencies in VS Code.
+
+4. The feature of converting audio files in features.py was added to ensure the webapp correctly runs, because it might in some 
+cases remain unchanged or do nothing when the audio file isn't compaitable with the requirements of the model, which 
+might happen in most of the cases, it wasn't present in your original version of this model in the Jupyter Notebook. \
+
+5. Now coming to the ser-webapp --- >
+
+## Route for home page
+@app.route('/')
+def home():
+    return render_template('index.html',value="")
+ 
+ Make sure the above code snipped it upto the mark.
+
+
+ 6. ## Route for results
+@app.route('/results', methods = ['GET', 'POST'])
+def results():
+    """
+    This route is used to save the file, convert the audio to 16000hz monochannel,
+    and predict the emotion using the saved binary model
+    """
+    if not os.path.isdir("./audio"):
+        os.mkdir("audio")
+
+    if request.method == 'POST':
+        try:
+          f = request.files['file']
+          filename = secure_filename(f.filename)
+          f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+        except:
+          return render_template('index.html', value="")
+
+    wav_file_pre  = os.listdir("./audio")[0]
+    wav_file_pre = f"{os.getcwd()}/audio/{wav_file_pre}"
+    wav_file = convert(wav_file_pre)
+    os.remove(wav_file_pre)
+    model = pickle.load(open(f"{os.getcwd()}/result/mlp_classifier.model", "rb"))
+    x_test = extract_feature(wav_file)
+    y_pred = model.predict(np.array([x_test]))
+    os.remove(wav_file)
+    ************************************************************************ -- replace it with the name of prediction template
+    return render_template('predict.html', value=y_pred[0])
+    print(y_pred)
+
+    Here, insert the values of your resulting templace, provided that the template for the prediction page hasn't been finalized yet, the page name and values in
+    the provided code snippet above can be changed as per the values then on.
+
+7. IN ser-webapp & features.py I've made 2-3 comments like in the ones above followed by **************************************, just remove them and those stars.
+
+8. Once done with everything, the filepaths, prediction template, and putting in the right values, you hev to run the model, in order to do so....
+
+    In mlp_classifier-main.py [Open Terminal -- New Terminal and type "python mlp_classifier-main.py' remove the apostrophes] // This will run your model, build the
+                                                                                                                                 binary files, and test the accuracy. :)
+    
+    Now in ser-webapp.py follow the same step and in the terminal type '. ./start_flask.sh' (remove the apostrophes)
+
+DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE! :)
