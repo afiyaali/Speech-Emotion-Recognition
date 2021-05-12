@@ -39,7 +39,7 @@ def results():
     x_test = extract_feature(wav_file)
     y_pred = model.predict(np.array([x_test])) 
     os.remove(wav_file)
-    return render_template('index.html', value= y_pred[0])
+    return render_template('index.html', value= y_pred[0],text= "The emotion of speaker is ")
     print( y_pred)
 
 if __name__ == "__main__":
